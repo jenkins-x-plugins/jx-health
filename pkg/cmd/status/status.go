@@ -27,7 +27,7 @@ import (
 	"github.com/jenkins-x-plugins/jx-health/pkg/rootcmd"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/helper"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/cobras/templates"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 )
 
@@ -114,18 +114,18 @@ func NewCmdStatus() (*cobra.Command, *Options) {
 func (o *Options) Validate() error {
 	err := o.HealthOptions.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate health options")
+		return fmt.Errorf("failed to validate health options: %w", err)
 	}
 
 	f := kubeclient.NewFactory()
 	o.cfg, err = f.CreateKubeConfig()
 	if err != nil {
-		return errors.Wrapf(err, "failed to get kubernetes config")
+		return fmt.Errorf("failed to get kubernetes config: %w", err)
 	}
 
 	o.KubeClient, err = kubernetes.NewForConfig(o.cfg)
 	if err != nil {
-		return errors.Wrapf(err, "error building kubernetes clientset")
+		return fmt.Errorf("error building kubernetes clientset: %w", err)
 	}
 
 	// if user wants information linked to any health check status then lookup the information we have
@@ -139,7 +139,7 @@ func (o *Options) Validate() error {
 	// check kuberhealthy is installed
 	err = o.verifyKuberhealthyRunning()
 	if err != nil {
-		return errors.Wrapf(err, "failed to verify Kuberheathy is running")
+		return fmt.Errorf("failed to verify Kuberheathy is running: %w", err)
 	}
 	return nil
 }
@@ -148,7 +148,7 @@ func (o *Options) verifyKuberhealthyRunning() error {
 	d, err := o.KubeClient.AppsV1().Deployments(o.KuberhealthyNamespace).Get(context.TODO(), o.KuberhealthyName, metav1.GetOptions{})
 	if err != nil {
 		if o.FailIfNoKuberhealthy {
-			return errors.Wrapf(err, "error finding kuberhealthy deployment %s running in the %s namespace, is it installed?", o.KuberhealthyName, o.KuberhealthyNamespace)
+			return fmt.Errorf("error finding kuberhealthy deployment %s running in the %s namespace, is it installed?: %w", o.KuberhealthyName, o.KuberhealthyNamespace, err)
 		}
 
 		log.Logger().Infof("kuberhealthy is not running in namespace %s with deployment %s", info(o.KuberhealthyName), info(o.KuberhealthyNamespace))
@@ -157,7 +157,7 @@ func (o *Options) verifyKuberhealthyRunning() error {
 	}
 
 	if *d.Spec.Replicas != d.Status.ReadyReplicas {
-		return errors.Wrapf(err, "not all kuberhealthy pods are running in the %s namespace, expected %d got %d?", kuberhealthyNamespace, d.Spec.Replicas, d.Status.ReadyReplicas)
+		return fmt.Errorf("not all kuberhealthy pods are running in the %s namespace, expected %d got %d?", kuberhealthyNamespace, d.Spec.Replicas, d.Status.ReadyReplicas)
 	}
 	o.KuberhealthyRunning = true
 	return nil
@@ -167,7 +167,7 @@ func (o *Options) verifyKuberhealthyRunning() error {
 func (o *Options) Run() error {
 	err := o.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate status options")
+		return fmt.Errorf("failed to validate status options: %w", err)
 	}
 
 	if !o.KuberhealthyRunning {
@@ -188,18 +188,18 @@ func (o *Options) Run() error {
 
 	namespace, err := o.getNamespace()
 	if err != nil {
-		return errors.Wrapf(err, "failed to work out what namespace to use")
+		return fmt.Errorf("failed to work out what namespace to use: %w", err)
 	}
 
 	if o.Watch {
 		err = o.HealthOptions.WatchStates(table, o.cfg, namespace)
 		if err != nil {
-			return errors.Wrapf(err, "failed to watch health states")
+			return fmt.Errorf("failed to watch health states: %w", err)
 		}
 	} else {
 		err := o.HealthOptions.WriteStatusTable(table, namespace)
 		if err != nil {
-			return errors.Wrapf(err, "failed to build health table, is Kuberhealthy installed?")
+			return fmt.Errorf("failed to build health table, is Kuberhealthy installed?: %w", err)
 		}
 	}
 
@@ -221,7 +221,7 @@ func (o *Options) getNamespace() (string, error) {
 	default:
 		namespace, err = kubeclient.CurrentNamespace()
 		if err != nil {
-			return namespace, errors.Wrapf(err, "failed to find the current namespace")
+			return namespace, fmt.Errorf("failed to find the current namespace: %w", err)
 		}
 	}
 	return namespace, nil

@@ -10,7 +10,7 @@ import (
 
 	"sigs.k8s.io/yaml"
 
-	"github.com/Comcast/kuberhealthy/v2/pkg/khstatecrd"
+	khstatecrd "github.com/kuberhealthy/kuberhealthy/v2/pkg/apis/khstate/v1"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,11 +1,13 @@
 package options
 
 import (
-	"github.com/Comcast/kuberhealthy/v2/pkg/khcheckcrd"
-	"github.com/Comcast/kuberhealthy/v2/pkg/khstatecrd"
+	"fmt"
+
 	"github.com/jenkins-x/jx-kube-client/v3/pkg/kubeclient"
 	"github.com/jenkins-x/jx-logging/v3/pkg/log"
-	"github.com/pkg/errors"
+	khcheckcrd "github.com/kuberhealthy/kuberhealthy/v2/pkg/apis/khcheck/v1"
+	khstatecrd "github.com/kuberhealthy/kuberhealthy/v2/pkg/apis/khstate/v1"
+
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -18,8 +20,8 @@ const checkCRDVersion = "v1"
 
 // KHCheckOptions common CLI arguments for working with health
 type KHCheckOptions struct {
-	StateClient *khstatecrd.KuberhealthyStateClient
-	CheckClient *khcheckcrd.KuberhealthyCheckClient
+	StateClient *khstatecrd.KHStateV1Client
+	CheckClient *khcheckcrd.KHCheckV1Client
 }
 
 // Validate validates the options and returns the KuberhealthyCheckClient
@@ -34,14 +36,14 @@ func (o *KHCheckOptions) Validate() error {
 	if o.StateClient == nil {
 		o.StateClient, err = ClientStateClient(cfg, checkCRDGroup, checkCRDVersion)
 		if err != nil {
-			return errors.Wrap(err, "failed to create kuberhealthy check client")
+			return fmt.Errorf("failed to create kuberhealthy check client: %w", err)
 		}
 	}
 
 	if o.CheckClient == nil {
 		o.CheckClient, err = ClientCheckClient(cfg, checkCRDGroup, checkCRDVersion)
 		if err != nil {
-			return errors.Wrap(err, "failed to create kuberhealthy check client")
+			return fmt.Errorf("failed to create kuberhealthy check client: %w", err)
 		}
 	}
 
@@ -49,12 +51,12 @@ func (o *KHCheckOptions) Validate() error {
 }
 
 // ClientStateClient creates a rest client to use for interacting with Kuberhealthy state CRDs
-func ClientStateClient(cfg *rest.Config, groupName string, groupVersion string) (*khstatecrd.KuberhealthyStateClient, error) {
+func ClientStateClient(cfg *rest.Config, groupName string, groupVersion string) (*khstatecrd.KHStateV1Client, error) {
 	var err error
 
 	err = khcheckcrd.ConfigureScheme(groupName, groupVersion)
 	if err != nil {
-		return &khstatecrd.KuberhealthyStateClient{}, err
+		return &khstatecrd.KHStateV1Client{}, err
 	}
 
 	config := *cfg
@@ -63,18 +65,16 @@ func ClientStateClient(cfg *rest.Config, groupName string, groupVersion string) 
 	config.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: scheme.Codecs}
 	config.UserAgent = rest.DefaultKubernetesUserAgent()
 
-	client, err := rest.RESTClientFor(&config)
-
-	return khstatecrd.CreateClient(client), err
+	return khstatecrd.NewForConfig(&config)
 }
 
 // ClientStateClient creates a rest client to use for interacting with Kuberhealthy check CRDs
-func ClientCheckClient(cfg *rest.Config, groupName string, groupVersion string) (*khcheckcrd.KuberhealthyCheckClient, error) {
+func ClientCheckClient(cfg *rest.Config, groupName string, groupVersion string) (*khcheckcrd.KHCheckV1Client, error) {
 	var err error
 
 	err = khcheckcrd.ConfigureScheme(groupName, groupVersion)
 	if err != nil {
-		return &khcheckcrd.KuberhealthyCheckClient{}, err
+		return &khcheckcrd.KHCheckV1Client{}, err
 	}
 
 	config := *cfg
@@ -83,7 +83,5 @@ func ClientCheckClient(cfg *rest.Config, groupName string, groupVersion string) 
 	config.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: scheme.Codecs}
 	config.UserAgent = rest.DefaultKubernetesUserAgent()
 
-	client, err := rest.RESTClientFor(&config)
-
-	return khcheckcrd.CreateClient(client), err
+	return khcheckcrd.NewForConfig(&config)
 }
