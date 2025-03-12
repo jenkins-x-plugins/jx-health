@@ -9,8 +9,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/Comcast/kuberhealthy/v2/pkg/khcheckcrd"
 	"github.com/jenkins-x/jx-helpers/v3/pkg/termcolor"
+	khcheckcrd "github.com/kuberhealthy/kuberhealthy/v2/pkg/apis/khcheck/v1"
 
 	"github.com/liggitt/tabwriter"
 
@@ -22,10 +22,10 @@ import (
 
 	"github.com/jenkins-x-plugins/jx-health/pkg/health/lookup"
 
-	"github.com/Comcast/kuberhealthy/v2/pkg/khstatecrd"
+	khstatecrd "github.com/kuberhealthy/kuberhealthy/v2/pkg/apis/khstate/v1"
 
 	"github.com/jenkins-x-plugins/jx-health/pkg/options"
-	"github.com/pkg/errors"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
@@ -49,24 +49,24 @@ func (o Options) WriteStatusTable(table *tabwriter.Writer, ns string) error {
 
 	err := o.KHCheckOptions.Validate()
 	if err != nil {
-		return errors.Wrapf(err, "failed to validate KHCheckOptions")
+		return fmt.Errorf("failed to validate KHCheckOptions: %w", err)
 	}
 
 	// get a list of all Kuberhealthy states
-	states, err := o.KHCheckOptions.StateClient.List(metav1.ListOptions{}, resourceStates, ns)
+	states, err := o.KHCheckOptions.StateClient.KuberhealthyStates(ns).List(metav1.ListOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "failed to list resource %s in namespace %s", resourceStates, ns)
+		return fmt.Errorf("failed to list resource %s in namespace %s: %w", resourceStates, ns, err)
 	}
 
 	// get a list of all Kuberhealthy checks
-	checks, err := o.KHCheckOptions.CheckClient.List(metav1.ListOptions{}, resourceChecks, ns)
+	checks, err := o.KHCheckOptions.CheckClient.KuberhealthyChecks(ns).List(metav1.ListOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "failed to list resource %s in namespace %s", resourceChecks, ns)
+		return fmt.Errorf("failed to list resource %s in namespace %s: %w", resourceChecks, ns, err)
 	}
 
-	o.annotateStates(states, checks)
+	o.annotateStates(&states, &checks)
 
-	rows := o.populateTable(states)
+	rows := o.populateTable(&states)
 	for _, row := range rows {
 		_, err = fmt.Fprintln(table, strings.Join(row, "\t"))
 		if err != nil {
@@ -145,7 +145,7 @@ func (o Options) WatchStates(table *tabwriter.Writer, cfg *rest.Config, namespac
 	// Grab a dynamic interface that we can create informers from
 	dc, err := dynamic.NewForConfig(cfg)
 	if err != nil {
-		return errors.Wrapf(err, "could not generate dynamic client for config")
+		return fmt.Errorf("could not generate dynamic client for config: %w", err)
 	}
 	// Create a factory object that we can say "hey, I need to watch this resource"
 	// and it will give us back an informer for it

@@ -1,7 +1,8 @@
 package lookup
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
+
 	"sigs.k8s.io/yaml"
 )
 
@@ -19,11 +20,11 @@ func NewLookupData() (LoopkupData, error) {
 
 	byteArray, err := Asset("pkg/health/lookup/static_data/info.yaml")
 	if err != nil {
-		return LoopkupData{}, errors.Wrapf(err, "failed to find health status information data")
+		return LoopkupData{}, fmt.Errorf("failed to find health status information data: %w", err)
 	}
 	err = yaml.Unmarshal(byteArray, &data.Info)
 	if err != nil {
-		return LoopkupData{}, errors.Wrapf(err, "failed to unmarshal health status information data")
+		return LoopkupData{}, fmt.Errorf("failed to unmarshal health status information data: %w", err)
 	}
 
 	return data, nil
