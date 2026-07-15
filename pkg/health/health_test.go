@@ -1,7 +1,7 @@
 package health
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -65,7 +65,7 @@ func TestHealthOptions_GetJenkinsXTable(t *testing.T) {
 func loadTestStates(t *testing.T, name string) *khstatecrd.KuberhealthyStateList {
 	file := filepath.Join("test_data", name, "states.yaml")
 
-	setupData, err := ioutil.ReadFile(file)
+	setupData, err := os.ReadFile(file)
 	assert.NoError(t, err, "failed to read file")
 
 	states := &khstatecrd.KuberhealthyStateList{}

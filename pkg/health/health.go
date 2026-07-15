@@ -47,19 +47,19 @@ type Options struct {
 // WriteStatusTable returns a table containing statuses
 func (o Options) WriteStatusTable(table *tabwriter.Writer, ns string) error {
 
-	err := o.KHCheckOptions.Validate()
+	err := o.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate KHCheckOptions: %w", err)
 	}
 
 	// get a list of all Kuberhealthy states
-	states, err := o.KHCheckOptions.StateClient.KuberhealthyStates(ns).List(metav1.ListOptions{})
+	states, err := o.StateClient.KuberhealthyStates(ns).List(metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to list resource %s in namespace %s: %w", resourceStates, ns, err)
 	}
 
 	// get a list of all Kuberhealthy checks
-	checks, err := o.KHCheckOptions.CheckClient.KuberhealthyChecks(ns).List(metav1.ListOptions{})
+	checks, err := o.CheckClient.KuberhealthyChecks(ns).List(metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to list resource %s in namespace %s: %w", resourceChecks, ns, err)
 	}
@@ -85,13 +85,13 @@ func (o Options) populateTable(checks *khstatecrd.KuberhealthyStateList) [][]str
 
 	var rows [][]string
 	// add Kuberhealthy check results to the table
-	for _, check := range checks.Items {
-		rows = append(rows, o.populateRow(check)...)
+	for i := range checks.Items {
+		rows = append(rows, o.populateRow(&checks.Items[i])...)
 	}
 	return rows
 }
 
-func (o Options) populateRow(check khstatecrd.KuberhealthyState) [][]string {
+func (o Options) populateRow(check *khstatecrd.KuberhealthyState) [][]string {
 	var rows [][]string
 
 	status := "ERROR"
@@ -203,13 +203,16 @@ func (o Options) startWatching(stopCh <-chan struct{}, s cache.SharedIndexInform
 			}
 		},
 	}
-	s.AddEventHandler(handlers)
+	if _, err := s.AddEventHandler(handlers); err != nil {
+		log.Logger().Infof("error adding event handler: %v", err)
+		return
+	}
 	s.Run(stopCh)
 }
 
 func (o Options) writeRow(state *khstatecrd.KuberhealthyState, table *tabwriter.Writer) {
 
-	rows := o.populateRow(*state)
+	rows := o.populateRow(state)
 	for _, row := range rows {
 		_, err := fmt.Fprintln(table, strings.Join(row, "\t"))
 		if err != nil {

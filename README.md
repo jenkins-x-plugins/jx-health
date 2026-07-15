@@ -10,7 +10,7 @@ jx-health is a small command line tool working with health statuses from [Kuberh
 
 Using Kuberhealthy and custom checks we are able to report the health of a Kubernetes cluster by only reading the Kuberhealthy state custom resources.  This is good for user RBAC restricted environments as the Kuebrhealthy checks run with a Kubernetes service account to validate things like secrets, without revealing any sensitive data and report errors when a user may not have access.
 
-jx-health is not tied to Jenkins X, it can be installed and used standalone though using Jenkins X 3.x (alpha) makes it easier to get started.
+jx-health is not tied to JayeX, it can be installed and used standalone though using JayeX 3.x (alpha) makes it easier to get started.
 
 ## RBAC requirements
 The required RBAC needed for users of this command:
@@ -20,8 +20,8 @@ The required RBAC needed for users of this command:
 | Deployments | Get | kuberhealthy | used to verify Kuberhealthy is running |
 | khstates.v1.comcast.github.io | List | kuberhealthy | used to return the status of default Kuberhealthy checks |
 | khstates.v1.comcast.github.io | Watch | kuberhealthy | used to watch the status of default Kuberhealthy checks |
-| khstates.v1.comcast.github.io | List | * | used to return the status of Jenkins X and custom Kuberhealthy checks in all namespaces |
-| khstates.v1.comcast.github.io | Watch | * | used to watch the status of Jenkins X and custom Kuberhealthy checks in all namespaces |
+| khstates.v1.comcast.github.io | List | * | used to return the status of JayeX and custom Kuberhealthy checks in all namespaces |
+| khstates.v1.comcast.github.io | Watch | * | used to watch the status of JayeX and custom Kuberhealthy checks in all namespaces |
 
 ## Commands
 
@@ -48,7 +48,7 @@ Choose one of the two options below:
 helm repo add kuberhealthy https://kuberhealthy.github.io/kuberhealthy/helm-repos
 helm install kuberhealthy kuberhealthy/kuberhealthy -n kuberhealthy --set check.daemonset.enabled=true --set check.deployment.enabled=true --set check.dnsInternal.enabled=true --set check.networkConnection.enabled=true --create-namespace
 ```
-optionally install the Jenkins X 3.x custom health checks
+optionally install the JayeX 3.x custom health checks
 ```
 helm repo add jx3 https://storage.googleapis.com/jenkinsxio/charts
 helm install cluster-checks jx3/jx-kh-check -n kuberhealthy --set jxPodStatus.enabled=true --set jxPodStatus.cluster.enabled=true --set jxSecrets.enabled=true --set jxSecrets.cluster.enabled=true
@@ -59,8 +59,8 @@ helm install health-checks-install jx3/jx-kh-check -n jx-git-operator --set jxIn
 jx-health get status --all-namespaces --watch
 ```
 
-#### 2. Using Jenkins X 3.x (alpha)
-If using Jenkins X 3 alpha then you get the benefits of a top level CLI to manage upgrades and GitOps for you cluster.
+#### 2. Using JayeX 3.x (alpha)
+If using JayeX 3 alpha then you get the benefits of a top level CLI to manage upgrades and GitOps for you cluster.
 
 Get the plugin by running
 ```
@@ -95,7 +95,7 @@ jx health get status --all-namespaces --watch
 ```
 [![asciicast](https://asciinema.org/a/NIVl2oIzWNlz1cZ9GhJ2y7qA7.svg)](https://asciinema.org/a/NIVl2oIzWNlz1cZ9GhJ2y7qA7?autoplay=1)
 
-or using the [Jenkins X Octant plugin](https://github.com/jenkins-x/octant-jx)
+or using the [JayeX Octant plugin](https://github.com/jenkins-x/octant-jx)
 
 ![](docs/octant_health.png)
 

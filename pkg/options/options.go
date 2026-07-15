@@ -51,16 +51,14 @@ func (o *KHCheckOptions) Validate() error {
 }
 
 // ClientStateClient creates a rest client to use for interacting with Kuberhealthy state CRDs
-func ClientStateClient(cfg *rest.Config, groupName string, groupVersion string) (*khstatecrd.KHStateV1Client, error) {
-	var err error
-
-	err = khcheckcrd.ConfigureScheme(groupName, groupVersion)
+func ClientStateClient(cfg *rest.Config, groupName, groupVersion string) (*khstatecrd.KHStateV1Client, error) {
+	err := khcheckcrd.ConfigureScheme(groupName, groupVersion)
 	if err != nil {
 		return &khstatecrd.KHStateV1Client{}, err
 	}
 
 	config := *cfg
-	config.ContentConfig.GroupVersion = &schema.GroupVersion{Group: groupName, Version: groupVersion}
+	config.GroupVersion = &schema.GroupVersion{Group: groupName, Version: groupVersion}
 	config.APIPath = "/apis"
 	config.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: scheme.Codecs}
 	config.UserAgent = rest.DefaultKubernetesUserAgent()
@@ -69,16 +67,14 @@ func ClientStateClient(cfg *rest.Config, groupName string, groupVersion string) 
 }
 
 // ClientStateClient creates a rest client to use for interacting with Kuberhealthy check CRDs
-func ClientCheckClient(cfg *rest.Config, groupName string, groupVersion string) (*khcheckcrd.KHCheckV1Client, error) {
-	var err error
-
-	err = khcheckcrd.ConfigureScheme(groupName, groupVersion)
+func ClientCheckClient(cfg *rest.Config, groupName, groupVersion string) (*khcheckcrd.KHCheckV1Client, error) {
+	err := khcheckcrd.ConfigureScheme(groupName, groupVersion)
 	if err != nil {
 		return &khcheckcrd.KHCheckV1Client{}, err
 	}
 
 	config := *cfg
-	config.ContentConfig.GroupVersion = &schema.GroupVersion{Group: groupName, Version: groupVersion}
+	config.GroupVersion = &schema.GroupVersion{Group: groupName, Version: groupVersion}
 	config.APIPath = "/apis"
 	config.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: scheme.Codecs}
 	config.UserAgent = rest.DefaultKubernetesUserAgent()
