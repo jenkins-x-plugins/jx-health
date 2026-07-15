@@ -91,7 +91,7 @@ func NewCmdStatus() (*cobra.Command, *Options) {
 		Short:   "Gets health statuses",
 		Long:    cmdLong,
 		Example: fmt.Sprintf(cmdExample, rootcmd.BinaryName, rootcmd.BinaryName, rootcmd.BinaryName, rootcmd.BinaryName, rootcmd.BinaryName),
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, args []string) {
 			o.Args = args
 			err := o.Run()
 			helper.CheckErr(err)
@@ -152,7 +152,7 @@ func (o *Options) verifyKuberhealthyRunning() error {
 		}
 
 		log.Logger().Infof("kuberhealthy is not running in namespace %s with deployment %s", info(o.KuberhealthyName), info(o.KuberhealthyNamespace))
-		log.Logger().Infof("for help on installing kuberhealthy see: %s", info("https://jenkins-x.io/v3/admin/setup/health#install"))
+		log.Logger().Infof("for help on installing kuberhealthy see: %s", info("https://jayex.io/v3/admin/setup/health#install"))
 		return nil
 	}
 
