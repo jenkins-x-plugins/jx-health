@@ -3,7 +3,7 @@ module github.com/jenkins-x-plugins/jx-health
 require (
 	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38
 	github.com/cpuguy83/go-md2man v1.0.10
-	github.com/jenkins-x/jx-helpers/v3 v3.11.3
+	github.com/jenkins-x/jx-helpers/v3 v3.11.6
 	github.com/jenkins-x/jx-kube-client/v3 v3.0.11
 	github.com/jenkins-x/jx-logging/v3 v3.1.6
 	github.com/kuberhealthy/kuberhealthy/v2 v2.7.1
@@ -66,9 +66,9 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/net v0.54.0 // indirect
+	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/term v0.43.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
