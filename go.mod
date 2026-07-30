@@ -3,7 +3,7 @@ module github.com/jenkins-x-plugins/jx-health
 require (
 	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38
 	github.com/cpuguy83/go-md2man v1.0.10
-	github.com/jenkins-x/jx-helpers/v3 v3.11.6
+	github.com/jenkins-x/jx-helpers/v3 v3.11.7
 	github.com/jenkins-x/jx-kube-client/v3 v3.0.11
 	github.com/jenkins-x/jx-logging/v3 v3.1.6
 	github.com/kuberhealthy/kuberhealthy/v2 v2.7.1
